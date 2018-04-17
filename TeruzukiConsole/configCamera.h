@@ -4,10 +4,13 @@
 
 #include <librealsense2/rs.hpp>
 
-#define EnableColor		1
-#define EnableInfrared	2
+typedef enum supportDevice
+{
+	REALSENSE_415,
+	REALSENSE_435,
+} supportDevice;
 
-static int detectDevice()
+static supportDevice detectDevice()
 {
 	rs2::context ctx = rs2::context();
 	rs2::device_list devices = ctx.query_devices();
@@ -15,7 +18,7 @@ static int detectDevice()
 
 	if (devices.size() == 0)
 	{
-		throw std::runtime_error("No device connected, please connect a RealSense device");
+		throw std::runtime_error("No device connected, please connect a RealSense 415 or 435.");
 		//rs2::device_hub device_hub(ctx);
 		//selected_device = device_hub.wait_for_device();
 	}
@@ -30,14 +33,12 @@ static int detectDevice()
 			
 			std::cout << "Detected device: " << name << std::endl;
 
-			if (name == "Intel RealSense 410")
-				return EnableInfrared;
-			else if (name == "Intel RealSense 415")
-				return EnableColor;
+			if (name == "Intel RealSense 415")
+				return REALSENSE_415;
 			else if (name == "Intel RealSense 435")
-				return EnableColor;
+				return REALSENSE_435;
 		}
-		throw std::runtime_error("No device connected, please connect a RealSense device");
+		throw std::runtime_error("No device connected, please connect a RealSense 415 or 435.");
 	}
 }
 

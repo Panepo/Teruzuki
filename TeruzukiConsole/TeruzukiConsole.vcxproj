@@ -154,11 +154,14 @@
     <ClInclude Include="app.h" />
     <ClInclude Include="configCamera.h" />
     <ClInclude Include="funcFormat.h" />
+    <ClInclude Include="zukiRecognizer.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="app.cpp" />
     <ClCompile Include="funcFormat.cpp" />
+    <ClCompile Include="zukiRecognizer.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
