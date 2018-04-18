@@ -10,7 +10,9 @@
 class zukiRecognizer
 {
 public:
-	static void RecognizerMain(
+	zukiRecognizer();
+
+	void RecognizerMain(
 		cv::Mat & matOutput,
 		rs2::pipeline & pipeline, 
 		rs2::spatial_filter & filterSpat, 

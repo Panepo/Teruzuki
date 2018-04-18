@@ -46,17 +46,21 @@ void app::cameraInitial()
 
 	for (int i = 0; i < 10; i++) pipeline.wait_for_frames();
 
+	cv::setMouseCallback(windowTitle, eventMouseS, this);
 }
 
 void app::cameraProcess()
 {
 	begin = clock();
-	cv::setMouseCallback(windowTitle, eventMouseS, this);
 
+	// declare application plugins
+	zukiRecognizer recognizer;
+
+	// application main process
 	switch (state)
 	{
 	case APPSTATE_RECOGNIZER:
-		zukiRecognizer::RecognizerMain(matOutput, pipeline, filterSpat, filterTemp, intrinsics);
+		recognizer.RecognizerMain(matOutput, pipeline, filterSpat, filterTemp, intrinsics);
 		break;
 	default:
 		state = APPSTATE_EXIT;
@@ -90,7 +94,6 @@ void app::setResolution(int stream, int width, int height, int fps)
 		break;
 	}
 }
-
 
 void app::setVisualPreset(std::string preset)
 {

@@ -1,6 +1,10 @@
 #include "stdafx.h"
 #include "zukiRecognizer.h"
 
+zukiRecognizer::zukiRecognizer()
+{
+}
+
 void zukiRecognizer::RecognizerMain(cv::Mat & matOutput, rs2::pipeline & pipeline, rs2::spatial_filter & filterSpat, rs2::temporal_filter & filterTemp, rs2_intrinsics & intrinsics)
 {
 	rs2::align alignTo(RS2_STREAM_COLOR);
@@ -9,7 +13,8 @@ void zukiRecognizer::RecognizerMain(cv::Mat & matOutput, rs2::pipeline & pipelin
 
 	cv::Mat matColor = funcFormat::frame2Mat(alignedFrame.get_color_frame());
 
-	cv::Mat matInfrared = funcFormat::frame2Mat(alignedFrame.get_infrared_frame());
+	//cv::Mat matInfrared = funcFormat::frame2Mat(alignedFrame.get_infrared_frame());
+	cv::Mat matInfrared = funcFormat::frame2Mat(data.get_infrared_frame());
 	
 	rs2::colorizer colorize;
 	colorize.set_option(RS2_OPTION_COLOR_SCHEME, 0);
@@ -19,7 +24,7 @@ void zukiRecognizer::RecognizerMain(cv::Mat & matOutput, rs2::pipeline & pipelin
 	rs2::frame depthColor = colorize(depth);
 	cv::Mat matDepth = funcFormat::frame2Mat(depthColor);
 
-	matOutput = matInfrared.clone();
+	matOutput = matColor.clone();
 }
 
 
