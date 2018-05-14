@@ -8,6 +8,8 @@
 app::app(std::string title)
 {
 	windowTitle = title;
+	cv::namedWindow(windowTitle, CV_WINDOW_AUTOSIZE);
+	cv::setMouseCallback(windowTitle, eventMouseS, this);
 }
 
 void app::cameraInitial()
@@ -45,30 +47,52 @@ void app::cameraInitial()
 	filterSpat.set_option(RS2_OPTION_HOLES_FILL, 5);
 
 	for (int i = 0; i < 10; i++) pipeline.wait_for_frames();
-
-	cv::setMouseCallback(windowTitle, eventMouseS, this);
 }
 
 void app::cameraProcess()
 {
-	begin = clock();
-
-	// declare application plugins
-	zukiRecognizer recognizer;
-
+	std::string infoText;
+	auto t0 = std::chrono::high_resolution_clock::now();
+	static double elapsedAvg = 0;
+	typedef std::chrono::duration<double, std::ratio<1, 1000>> ms;
+	
 	// application main process
+	//switch (stream)
+	//{
+	//case STREAM_COLOR:
+	//case STREAM_INFRARED:
+	//case STREAM_DEPTH:
+	//	funcStream::streamSelector(matOutput, depth, stream, pipeline, filterSpat, filterTemp, configZoomer);
+	//	break;
+	//case STREAM_FILE:
+	//	break;
+	//default:
+	//	break;
+	//}
+
+	rs2_stream align = RS2_STREAM_COLOR;
+	rs2::depth_frame depth = funcStream::streamSelector(matOutput, stream, pipeline, filterSpat, filterTemp, align, configZoomer);
+
 	switch (state)
 	{
 	case APPSTATE_RECOGNIZER:
-		recognizer.RecognizerMain(matOutput, pipeline, filterSpat, filterTemp, intrinsics);
+		recognizer.recognizerMain(matOutput, depth, intrinsics, configZoomer);
 		break;
 	default:
 		state = APPSTATE_EXIT;
 		break;
 	}
 
-	end = clock();
-	elapsed = double(end - begin) * 1000 / CLOCKS_PER_SEC;
+	auto t1 = std::chrono::high_resolution_clock::now();
+	double elapsed = std::chrono::duration_cast<ms>(t1 - t0).count();
+	elapsedAvg = floor((elapsedAvg * 9 + elapsed) / 10);
+
+	std::ostringstream strs;
+	strs << elapsedAvg;
+	std::string str = strs.str() + " ms " + infoText;
+	funcStream::streamInfoer(&matOutput, str);
+
+	eventKeyboard();
 }
 
 // =================================================================================
@@ -112,5 +136,52 @@ void app::eventMouseS(int event, int x, int y, int flags, void* userdata)
 
 void app::eventMouse(int event, int x, int y, int flags)
 {
+	int modx, mody;
+	
+	if (x >= 0 && x <= ColorWidth)
+		modx = x;
+	else
+		modx = ColorWidth - 1;
+	if (y >= 0 && y <= ColorHeight)
+		mody = y;
+	else
+		mody = ColorHeight - 1;
 
+	switch (state)
+	{
+	case APPSTATE_RECOGNIZER:
+		recognizer.recognizerMouseHandler(event, modx, mody, flags, configZoomer);
+	default:
+		break;
+	}
+}
+
+void app::eventKeyboard()
+{
+	char key = cv::waitKey(10);
+
+	if (key == 'q' || key == 'Q')
+		state = APPSTATE_EXIT;
+	else if (key == 'w' || key == 'W')
+	{
+		time_t t = std::time(nullptr);
+		#pragma warning( disable : 4996 )
+		tm tm = *std::localtime(&t);
+
+		std::ostringstream oss;
+		oss << std::put_time(&tm, "%d-%m-%Y %H-%M-%S");
+		std::string str = windowTitle + "_" + oss.str() + ".jpg";
+		cv::imwrite(str, matOutput);
+		std::cout << "file saved: " << str << std::endl;
+	}
+	else if (key == 'r' || key == 'R')
+	{
+		if (state == APPSTATE_RECOGNIZER)
+			recognizer.recognizerKeyboardHandler();
+		else
+		{
+			state = APPSTATE_RECOGNIZER;
+			configZoomer.miniMap = false;
+		}
+	}
 }

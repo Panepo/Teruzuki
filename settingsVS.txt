@@ -5,4 +5,4 @@ Library Directories
 D:\Library\librealsense\lib\x64;D:\Library\opencvIntel\build\x64\vc14\lib;$(LibraryPath)
 
 Additional Dependencies
-realsense2.lib;opencv_pvl331.lib;opencv_world331.lib;%(AdditionalDependencies)
+realsense2.lib;opencv_pvl341.lib;opencv_world341.lib;%(AdditionalDependencies)
