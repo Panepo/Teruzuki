@@ -110,6 +110,25 @@ void zukiRecognizer::recogDetectorFI(cv::Mat & matOutput, rs2::depth_frame & dep
 		distA = funcGeometry3D::calcDist3D(pixelEyeL, pixelEyeR, &depth, &intrinsics);
 		distB = funcGeometry3D::calcDist3D(pixelEyeR, pixelMouth, &depth, &intrinsics);
 		distC = funcGeometry3D::calcDist3D(pixelEyeL, pixelMouth, &depth, &intrinsics);
+
+		if (distA < recogLengthMin || distA > recogLengthMax)
+		{
+			faces.erase(faces.begin() + i);
+			std::cout << "Photo detected, face erased." << std::endl;
+			break;
+		}
+		else if (distB < recogLengthMin || distB > recogLengthMax)
+		{
+			faces.erase(faces.begin() + i);
+			std::cout << "Photo detected, face erased." << std::endl;
+			break;
+		}
+		else if (distC < recogLengthMin || distC > recogLengthMax)
+		{
+			faces.erase(faces.begin() + i);
+			std::cout << "Photo detected, face erased." << std::endl;
+			break;
+		}
 	}
 }
 

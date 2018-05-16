@@ -22,8 +22,8 @@
 #define recogColorSmile cv::Scalar(255, 0, 0)		// blue
 #define recogColorRecog cv::Scalar(0, 255, 0)		// green
 
-#define recogLengthMin	7
-#define recogLengthMax	20
+#define recogLengthMin	5
+#define recogLengthMax	12
 
 typedef enum RecognizerState
 {
