@@ -65,6 +65,7 @@ void zukiRecognizer::recognizerKeyboardHandler()
 void zukiRecognizer::recognizerProcess(cv::Mat & matOutput, rs2::depth_frame & depth, rs2_intrinsics & intrinsics, configZoomer & configZoomer)
 {
 	recogDetectorFD(matOutput);
+	recogDetectorFI(matOutput, depth, intrinsics);
 	recogDrawerFD(matOutput);
 
 	recogDetectorFR(matOutput);
@@ -84,6 +85,31 @@ void zukiRecognizer::recogDetectorFD(cv::Mat & matOutput)
 		pvlFD->detectMouth(matGray, faces[i]);
 		pvlFD->detectBlink(matGray, faces[i]);
 		pvlFD->detectSmile(matGray, faces[i]);
+	}
+}
+
+void zukiRecognizer::recogDetectorFI(cv::Mat & matOutput, rs2::depth_frame & depth, rs2_intrinsics & intrinsics)
+{
+	cv::Point posEyeL, posEyeR, posMouth;
+	float pixelEyeL[2], pixelEyeR[2], pixelMouth[2];
+	float distA, distB, distC;
+	
+	for (uint i = 0; i < faces.size(); ++i)
+	{
+		posEyeL = faces[i].get<cv::Point>(cv::pvl::Face::LEFT_EYE_POS);
+		posEyeR = faces[i].get<cv::Point>(cv::pvl::Face::RIGHT_EYE_POS);
+		posMouth = faces[i].get<cv::Point>(cv::pvl::Face::MOUTH_POS);
+
+		pixelEyeL[0] = (float)posEyeL.x;
+		pixelEyeL[1] = (float)posEyeL.y;
+		pixelEyeR[0] = (float)posEyeR.x;
+		pixelEyeR[1] = (float)posEyeR.y;
+		pixelMouth[0] = (float)posMouth.x;
+		pixelMouth[1] = (float)posMouth.y;
+
+		distA = funcGeometry3D::calcDist3D(pixelEyeL, pixelEyeR, &depth, &intrinsics);
+		distB = funcGeometry3D::calcDist3D(pixelEyeR, pixelMouth, &depth, &intrinsics);
+		distC = funcGeometry3D::calcDist3D(pixelEyeL, pixelMouth, &depth, &intrinsics);
 	}
 }
 

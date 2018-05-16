@@ -12,6 +12,7 @@
 #include "opencv2/pvl.hpp"
 
 #include "funcStream.h"
+#include "funcGeometry3D.h"
 
 #define recogColorFace	cv::Scalar(255, 255, 255)	// white
 #define recogColorEye	cv::Scalar(255, 0, 0)		// blue
@@ -20,6 +21,9 @@
 #define recogFont		cv::FONT_HERSHEY_PLAIN
 #define recogColorSmile cv::Scalar(255, 0, 0)		// blue
 #define recogColorRecog cv::Scalar(0, 255, 0)		// green
+
+#define recogLengthMin	7
+#define recogLengthMax	20
 
 typedef enum RecognizerState
 {
@@ -50,6 +54,7 @@ private:
 	void recognizerProcess(cv::Mat & matOutput, rs2::depth_frame & depth, rs2_intrinsics & intrinsics, configZoomer & configZoomer);
 
 	void recogDetectorFD(cv::Mat & matOutput);
+	void recogDetectorFI(cv::Mat & matOutput, rs2::depth_frame & depth, rs2_intrinsics & intrinsics);
 	void recogDetectorFR(cv::Mat & matOutput);
 
 	void recogDrawerFD(cv::Mat & matOutput);

@@ -71,7 +71,7 @@ void app::cameraProcess()
 	//}
 
 	rs2_stream align = RS2_STREAM_COLOR;
-	rs2::depth_frame depth = funcStream::streamSelector(matOutput, stream, pipeline, filterSpat, filterTemp, align, configZoomer);
+	rs2::depth_frame depth = funcStream::streamSelector(matOutput, stream, pipeline, filterDec, filterSpat, filterTemp, align, configZoomer);
 
 	switch (state)
 	{
@@ -182,6 +182,24 @@ void app::eventKeyboard()
 		{
 			state = APPSTATE_RECOGNIZER;
 			configZoomer.miniMap = false;
+		}
+	}
+	else if (key == 's' || key == 'S')
+	{
+		switch (stream)
+		{
+		case STREAM_COLOR:
+			stream = STREAM_INFRARED;
+			recognizer.config.state = RECOGNIZERSTATE_WAIT;
+			break;
+		case STREAM_INFRARED:
+			stream = STREAM_DEPTH;
+			recognizer.config.state = RECOGNIZERSTATE_WAIT;
+			break;
+		case STREAM_DEPTH:
+			stream = STREAM_COLOR;
+			recognizer.config.state = RECOGNIZERSTATE_PROCESS;
+			break;
 		}
 	}
 }

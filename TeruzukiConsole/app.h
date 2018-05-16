@@ -36,6 +36,7 @@ private:
 	// realsense private parameters
 	rs2::pipeline pipeline;
 	rs2_intrinsics intrinsics;
+	rs2::decimation_filter filterDec;
 	rs2::spatial_filter filterSpat;
 	rs2::temporal_filter filterTemp;
 	stream stream;

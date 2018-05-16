@@ -45,6 +45,7 @@ namespace funcStream
 		cv::Mat & matOutput,
 		stream stream,
 		rs2::pipeline & pipeline,
+		rs2::decimation_filter & filterDec,
 		rs2::spatial_filter & filterSpat,
 		rs2::temporal_filter & filterTemp,
 		rs2_stream align,

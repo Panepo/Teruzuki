@@ -33,9 +33,9 @@ static supportDevice detectDevice()
 			
 			std::cout << "Detected device: " << name << std::endl;
 
-			if (name == "Intel RealSense 415")
+			if (name == "Intel RealSense D415")
 				return REALSENSE_415;
-			else if (name == "Intel RealSense 435")
+			else if (name == "Intel RealSense D435")
 				return REALSENSE_435;
 		}
 		throw std::runtime_error("No device connected, please connect a RealSense 415 or 435.");
