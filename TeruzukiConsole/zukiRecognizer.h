@@ -25,6 +25,8 @@
 #define recogLengthMin	5
 #define recogLengthMax	12
 
+#define recogDiffMin	1
+
 typedef enum RecognizerState
 {
 	RECOGNIZERSTATE_WAIT,
@@ -59,6 +61,10 @@ private:
 
 	void recogDrawerFD(cv::Mat & matOutput);
 	void recogDrawerFR(cv::Mat & matOutput);
+
+	bool recogIdentifierDist(cv::Point posEyeL, cv::Point posEyeR, cv::Point posMouth, rs2::depth_frame & depth, rs2_intrinsics & intrinsics);
+	bool recogIdentifierDiff(cv::Point posEyeL, cv::Point posEyeR, cv::Point posMouth, rs2::depth_frame & depth, rs2_intrinsics & intrinsics);
+	bool recogIdentifierPath(cv::Point start, cv::Point end, rs2::depth_frame & depth, rs2_intrinsics & intrinsics);
 
 	cv::Mat matGray;
 	cv::Ptr<cv::pvl::FaceDetector> pvlFD;

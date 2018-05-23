@@ -91,8 +91,8 @@ void zukiRecognizer::recogDetectorFD(cv::Mat & matOutput)
 void zukiRecognizer::recogDetectorFI(cv::Mat & matOutput, rs2::depth_frame & depth, rs2_intrinsics & intrinsics)
 {
 	cv::Point posEyeL, posEyeR, posMouth;
-	float pixelEyeL[2], pixelEyeR[2], pixelMouth[2];
-	float distA, distB, distC;
+	bool FIdist = false;
+	bool FIdiff = false;
 	
 	for (uint i = 0; i < faces.size(); ++i)
 	{
@@ -100,33 +100,20 @@ void zukiRecognizer::recogDetectorFI(cv::Mat & matOutput, rs2::depth_frame & dep
 		posEyeR = faces[i].get<cv::Point>(cv::pvl::Face::RIGHT_EYE_POS);
 		posMouth = faces[i].get<cv::Point>(cv::pvl::Face::MOUTH_POS);
 
-		pixelEyeL[0] = (float)posEyeL.x;
-		pixelEyeL[1] = (float)posEyeL.y;
-		pixelEyeR[0] = (float)posEyeR.x;
-		pixelEyeR[1] = (float)posEyeR.y;
-		pixelMouth[0] = (float)posMouth.x;
-		pixelMouth[1] = (float)posMouth.y;
+		FIdist = recogIdentifierDist(posEyeL, posEyeR, posMouth, depth, intrinsics);
+		FIdiff = recogIdentifierDiff(posEyeL, posEyeR, posMouth, depth, intrinsics);
 
-		distA = funcGeometry3D::calcDist3D(pixelEyeL, pixelEyeR, &depth, &intrinsics);
-		distB = funcGeometry3D::calcDist3D(pixelEyeR, pixelMouth, &depth, &intrinsics);
-		distC = funcGeometry3D::calcDist3D(pixelEyeL, pixelMouth, &depth, &intrinsics);
-
-		if (distA < recogLengthMin || distA > recogLengthMax)
+		if (!FIdist)
 		{
 			faces.erase(faces.begin() + i);
-			std::cout << "Photo detected, face erased." << std::endl;
+			std::cout << "Photo detected, face erased. (dist)" << std::endl;
 			break;
 		}
-		else if (distB < recogLengthMin || distB > recogLengthMax)
+
+		if (!FIdiff)
 		{
 			faces.erase(faces.begin() + i);
-			std::cout << "Photo detected, face erased." << std::endl;
-			break;
-		}
-		else if (distC < recogLengthMin || distC > recogLengthMax)
-		{
-			faces.erase(faces.begin() + i);
-			std::cout << "Photo detected, face erased." << std::endl;
+			std::cout << "Photo detected, face erased. (diff)" << std::endl;
 			break;
 		}
 	}
@@ -213,5 +200,114 @@ void zukiRecognizer::recogDrawerFR(cv::Mat & matOutput)
 		cv::putText(matOutput, str, strPos, recogFont, 1.2, recogColorRecog, 2);
 	}
 }
+
+bool zukiRecognizer::recogIdentifierDist(cv::Point posEyeL, cv::Point posEyeR, cv::Point posMouth, rs2::depth_frame & depth, rs2_intrinsics & intrinsics)
+{
+	float pixelEyeL[2], pixelEyeR[2], pixelMouth[2];
+	float distA, distB, distC;
+	
+	pixelEyeL[0] = (float)posEyeL.x;
+	pixelEyeL[1] = (float)posEyeL.y;
+	pixelEyeR[0] = (float)posEyeR.x;
+	pixelEyeR[1] = (float)posEyeR.y;
+	pixelMouth[0] = (float)posMouth.x;
+	pixelMouth[1] = (float)posMouth.y;
+
+	distA = funcGeometry3D::calcDist3D(pixelEyeL, pixelEyeR, &depth, &intrinsics);
+	distB = funcGeometry3D::calcDist3D(pixelEyeR, pixelMouth, &depth, &intrinsics);
+	distC = funcGeometry3D::calcDist3D(pixelEyeL, pixelMouth, &depth, &intrinsics);
+
+	if (distA < recogLengthMin || distA > recogLengthMax 
+		|| distB < recogLengthMin || distB > recogLengthMax
+		|| distC < recogLengthMin || distC > recogLengthMax)
+	{
+		return false;
+	}
+	
+	return true;
+}
+
+bool zukiRecognizer::recogIdentifierDiff(cv::Point posEyeL, cv::Point posEyeR, cv::Point posMouth, rs2::depth_frame & depth, rs2_intrinsics & intrinsics)
+{
+	bool diff1, diff2, diff3 = false;
+	
+	diff1 = recogIdentifierPath(posEyeL, posEyeR, depth, intrinsics);
+	diff2 = recogIdentifierPath(posMouth, posEyeR, depth, intrinsics);
+	diff3 = recogIdentifierPath(posEyeL, posMouth, depth, intrinsics);
+
+	if (diff1 == false || diff2 == false || diff3 == false)
+		return false;
+	else
+		return true;
+}
+
+bool zukiRecognizer::recogIdentifierPath(cv::Point start, cv::Point end, rs2::depth_frame & depth, rs2_intrinsics & intrinsics)
+{
+	float posA[2] = { (float)start.x, (float)start.y };
+	float posB[2] = { (float)end.x, (float)end.y };
+
+	float xdiff = abs(posA[0] - posB[0]);
+	float ydiff = abs(posA[1] - posB[1]);
+	int posX = 0, posY = 0;
+	float dist = 0, parm = 1;
+	float directX = 1, directY = 1;
+	std::vector<float> output;
+
+	// get depth data of the route
+	if (posA[0] - posB[0] < 0)
+		directX = -1;
+
+	if (posA[1] - posB[1] < 0)
+		directY = -1;
+
+	if (xdiff < ydiff)
+	{
+		for (int i = 0; i < ydiff; i += 1)
+		{
+			posX = (int)floor(posB[0] + directX * (float)i * xdiff / ydiff);
+			posY = (int)floor(posB[1] + directY * (float)i);
+			dist = depth.get_distance(posX, posY);
+			output.push_back(dist);
+		}
+	}
+	else
+	{
+		for (int i = 0; i < xdiff; i += 1)
+		{
+			posX = (int)floor(posB[0] + directX * (float)i);
+			posY = (int)floor(posB[1] + directY * (float)i * ydiff / xdiff);
+			dist = depth.get_distance(posX, posY);
+			output.push_back(dist);
+		}
+	}
+
+	if (output.size() > 1)
+	{
+		std::vector<float> outputDiff;
+		std::vector<float> outputDiff2;
+
+		for (int i = 0; i < output.size() - 1; i += 1)
+		{
+			float temp = output[i - 1] - output[i];
+			outputDiff.push_back(temp);
+		}
+
+		for (int i = 0; i < outputDiff.size() - 1; i += 1)
+		{
+			float temp = outputDiff[i - 1] - outputDiff[i];
+			outputDiff2.push_back(temp);
+		}
+
+		auto diffMinMax = std::minmax_element(outputDiff2.begin(), outputDiff2.end());
+
+		if (*diffMinMax.second < recogDiffMin)
+			return false;
+		else
+			return true;
+	}
+
+	return false;
+}
+
 
 
