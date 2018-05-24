@@ -22,7 +22,10 @@
 #define recogColorSmile cv::Scalar(255, 0, 0)		// blue
 #define recogColorRecog cv::Scalar(0, 255, 0)		// green
 
-#define recogLengthMin	5
+#define enableIdenDist	1
+#define enableIdenDiff	1
+
+#define recogLengthMin	4
 #define recogLengthMax	12
 
 #define recogDiffMin	1
@@ -39,6 +42,7 @@ public:
 	RecognizerState state = RECOGNIZERSTATE_PROCESS;
 	cv::Point pixelMouse = cv::Point(0, 0);
 	std::string infoText = "";
+	bool switchFI = true;
 };
 
 

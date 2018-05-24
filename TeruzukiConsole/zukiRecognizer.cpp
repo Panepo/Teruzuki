@@ -65,7 +65,10 @@ void zukiRecognizer::recognizerKeyboardHandler()
 void zukiRecognizer::recognizerProcess(cv::Mat & matOutput, rs2::depth_frame & depth, rs2_intrinsics & intrinsics, configZoomer & configZoomer)
 {
 	recogDetectorFD(matOutput);
-	recogDetectorFI(matOutput, depth, intrinsics);
+	
+	if (config.switchFI)
+		recogDetectorFI(matOutput, depth, intrinsics);
+
 	recogDrawerFD(matOutput);
 
 	recogDetectorFR(matOutput);
@@ -93,29 +96,37 @@ void zukiRecognizer::recogDetectorFI(cv::Mat & matOutput, rs2::depth_frame & dep
 	cv::Point posEyeL, posEyeR, posMouth;
 	bool FIdist = false;
 	bool FIdiff = false;
-	
-	for (uint i = 0; i < faces.size(); ++i)
+	int eraseCount = 0;
+	int size = (int)faces.size();
+
+	std::cout << "===================================================" << std::endl;
+	for (int i = 0; i < size; i += 1)
 	{
 		posEyeL = faces[i].get<cv::Point>(cv::pvl::Face::LEFT_EYE_POS);
 		posEyeR = faces[i].get<cv::Point>(cv::pvl::Face::RIGHT_EYE_POS);
 		posMouth = faces[i].get<cv::Point>(cv::pvl::Face::MOUTH_POS);
 
+#if enableIdenDist
 		FIdist = recogIdentifierDist(posEyeL, posEyeR, posMouth, depth, intrinsics);
-		FIdiff = recogIdentifierDiff(posEyeL, posEyeR, posMouth, depth, intrinsics);
-
 		if (!FIdist)
 		{
-			faces.erase(faces.begin() + i);
+			faces.erase(faces.begin() + i - eraseCount);
+			eraseCount += 1;
 			std::cout << "Photo detected, face erased. (dist)" << std::endl;
-			break;
+			continue;
 		}
+#endif
 
+#if enableIdenDiff
+		FIdiff = recogIdentifierDiff(posEyeL, posEyeR, posMouth, depth, intrinsics);
 		if (!FIdiff)
 		{
-			faces.erase(faces.begin() + i);
+			faces.erase(faces.begin() + i - eraseCount);
+			eraseCount += 1;
 			std::cout << "Photo detected, face erased. (diff)" << std::endl;
-			break;
+			continue;
 		}
+#endif
 	}
 }
 
@@ -216,6 +227,13 @@ bool zukiRecognizer::recogIdentifierDist(cv::Point posEyeL, cv::Point posEyeR, c
 	distA = funcGeometry3D::calcDist3D(pixelEyeL, pixelEyeR, &depth, &intrinsics);
 	distB = funcGeometry3D::calcDist3D(pixelEyeR, pixelMouth, &depth, &intrinsics);
 	distC = funcGeometry3D::calcDist3D(pixelEyeL, pixelMouth, &depth, &intrinsics);
+
+	//std::cout << "distA: ";
+	//std::cout << distA;
+	//std::cout << " distB: ";
+	//std::cout << distB;
+	//std::cout << " distC: ";
+	//std::cout << distC << std::endl;
 
 	if (distA < recogLengthMin || distA > recogLengthMax 
 		|| distB < recogLengthMin || distB > recogLengthMax

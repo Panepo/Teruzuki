@@ -184,6 +184,16 @@ void app::eventKeyboard()
 			configZoomer.miniMap = false;
 		}
 	}
+	else if (key == 'a' || key == 'A')
+	{
+		if (state == APPSTATE_RECOGNIZER)
+		{
+			if (recognizer.config.switchFI)
+				recognizer.config.switchFI = false;
+			else
+				recognizer.config.switchFI = true;
+		}
+	}
 	else if (key == 's' || key == 'S')
 	{
 		switch (stream)
