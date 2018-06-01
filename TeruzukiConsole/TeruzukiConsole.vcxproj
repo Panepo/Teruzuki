@@ -156,6 +156,7 @@
     <ClInclude Include="funcFormat.h" />
     <ClInclude Include="funcGeometry3D.h" />
     <ClInclude Include="funcStream.h" />
+    <ClInclude Include="zukiDetector.h" />
     <ClInclude Include="zukiRecognizer.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -165,6 +166,7 @@
     <ClCompile Include="funcFormat.cpp" />
     <ClCompile Include="funcGeometry3D.cpp" />
     <ClCompile Include="funcStream.cpp" />
+    <ClCompile Include="zukiDetector.cpp" />
     <ClCompile Include="zukiRecognizer.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

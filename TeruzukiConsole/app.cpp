@@ -47,6 +47,9 @@ void app::cameraInitial()
 	filterSpat.set_option(RS2_OPTION_HOLES_FILL, 5);
 
 	for (int i = 0; i < 10; i++) pipeline.wait_for_frames();
+
+	// plugin initial
+	detector.setInputSize(ColorWidth, ColorHeight);
 }
 
 void app::cameraProcess()
@@ -77,6 +80,9 @@ void app::cameraProcess()
 	{
 	case APPSTATE_RECOGNIZER:
 		recognizer.recognizerMain(matOutput, depth, intrinsics, configZoomer);
+		break;
+	case APPSTATE_DETECTOR:
+		detector.detectorMain(matOutput, depth, intrinsics, configZoomer);
 		break;
 	default:
 		state = APPSTATE_EXIT;
@@ -181,6 +187,16 @@ void app::eventKeyboard()
 		else
 		{
 			state = APPSTATE_RECOGNIZER;
+			configZoomer.miniMap = false;
+		}
+	}
+	else if (key == 'd' || key == 'D')
+	{
+		if (state == APPSTATE_DETECTOR)
+			detector.detectorKeyboardHandler(stream);
+		else
+		{
+			state = APPSTATE_DETECTOR;
 			configZoomer.miniMap = false;
 		}
 	}

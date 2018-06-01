@@ -99,7 +99,7 @@ void zukiRecognizer::recogDetectorFI(cv::Mat & matOutput, rs2::depth_frame & dep
 	int eraseCount = 0;
 	int size = (int)faces.size();
 
-	std::cout << "===================================================" << std::endl;
+	//std::cout << "===================================================" << std::endl;
 	for (int i = 0; i < size; i += 1)
 	{
 		posEyeL = faces[i].get<cv::Point>(cv::pvl::Face::LEFT_EYE_POS);
@@ -235,9 +235,9 @@ bool zukiRecognizer::recogIdentifierDist(cv::Point posEyeL, cv::Point posEyeR, c
 	//std::cout << " distC: ";
 	//std::cout << distC << std::endl;
 
-	if (distA < recogLengthMin || distA > recogLengthMax 
-		|| distB < recogLengthMin || distB > recogLengthMax
-		|| distC < recogLengthMin || distC > recogLengthMax)
+	if (distA < recogDistMin || distA > recogDistMax 
+		|| distB < recogDistMin || distB > recogDistMax
+		|| distC < recogDistMin || distC > recogDistMax)
 	{
 		return false;
 	}
@@ -317,8 +317,18 @@ bool zukiRecognizer::recogIdentifierPath(cv::Point start, cv::Point end, rs2::de
 		}
 
 		auto diffMinMax = std::minmax_element(outputDiff2.begin(), outputDiff2.end());
+		std::cout << "diffMax: " << *diffMinMax.second << std::endl;
 
-		if (*diffMinMax.second < recogDiffMin)
+		float temp = 0;
+		for (int i = 0; i < outputDiff2.size() - 1; i += 1)
+		{
+			temp += abs(outputDiff2[i]);
+		}
+
+		std::cout << "diffSize: " << outputDiff2.size() << std::endl;
+		std::cout << "diffAvg: " << temp / outputDiff2.size() << std::endl;
+
+		if (temp / outputDiff2.size() < recogDiffMin)
 			return false;
 		else
 			return true;

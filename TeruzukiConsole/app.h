@@ -11,11 +11,13 @@
 #include "funcStream.h"
 
 #include "zukiRecognizer.h"
+#include "zukiDetector.h"
 
 typedef enum appState
 {
 	APPSTATE_EXIT,
 	APPSTATE_RECOGNIZER,
+	APPSTATE_DETECTOR,
 } appState;
 
 class app
@@ -59,6 +61,7 @@ private:
 
 	// declare application plugins
 	zukiRecognizer recognizer;
+	zukiDetector detector;
 };
 
 #endif

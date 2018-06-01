@@ -42,6 +42,9 @@
     <ClInclude Include="funcGeometry3D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="zukiDetector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -63,6 +66,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="funcGeometry3D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="zukiDetector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

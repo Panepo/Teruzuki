@@ -25,10 +25,10 @@
 #define enableIdenDist	1
 #define enableIdenDiff	1
 
-#define recogLengthMin	4
-#define recogLengthMax	12
+#define recogDistMin	4
+#define recogDistMax	12
 
-#define recogDiffMin	1
+#define recogDiffMin	0.5
 
 typedef enum RecognizerState
 {
